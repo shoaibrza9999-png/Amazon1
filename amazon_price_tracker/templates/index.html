@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amazon Price Tracker</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Amazon India Price Tracker</h1>
+            <div id="user-controls" class="hidden">
+                <span id="user-greeting"></span>
+                <button id="logout-btn">Logout</button>
+            </div>
+        </header>
+
+        <main>
+            <!-- Auth Section -->
+            <section id="auth-section">
+                <div class="auth-forms">
+                    <div class="form-container">
+                        <h2>Login</h2>
+                        <form id="login-form">
+                            <input type="text" id="login-username" placeholder="Username" required>
+                            <input type="password" id="login-password" placeholder="Password" required>
+                            <button type="submit">Login</button>
+                        </form>
+                    </div>
+
+                    <div class="form-container">
+                        <h2>Register</h2>
+                        <form id="register-form">
+                            <input type="text" id="reg-username" placeholder="Username" required>
+                            <input type="password" id="reg-password" placeholder="Password" required>
+                            <input type="email" id="reg-email" placeholder="Email (for alerts)" required>
+                            <input type="text" id="reg-scraper-key" placeholder="ScraperAPI Key" required>
+                            <input type="text" id="reg-telegram" placeholder="Telegram Chat ID (Optional)">
+                            <button type="submit">Register</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Dashboard Section -->
+            <section id="dashboard-section" class="hidden">
+                <div class="add-item-form">
+                    <h2>Add New Item to Track</h2>
+                    <form id="add-item-form">
+                        <input type="url" id="item-url" placeholder="Amazon India Product URL (https://www.amazon.in/...)" required>
+                        <input type="number" id="item-target-price" placeholder="Target Price (₹)" step="0.01" required>
+                        <button type="submit">Track Item</button>
+                    </form>
+                    <div id="add-msg"></div>
+                </div>
+
+                <div class="items-list">
+                    <h2>Your Tracked Items</h2>
+                    <table id="items-table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Current Price</th>
+                                <th>Target Price</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="items-body">
+                            <!-- Items populated here via JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Chart Modal/Section -->
+                <div id="chart-container" class="hidden">
+                    <h2>Price History: <span id="chart-title"></span></h2>
+                    <button id="close-chart">Close Graph</button>
+                    <canvas id="priceChart"></canvas>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
