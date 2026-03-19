@@ -1,3 +1,12 @@
+---
+title: Amazon Price Tracker
+emoji: 🛒
+colorFrom: yellow
+colorTo: red
+sdk: docker
+app_file: app.py
+pinned: false
+---
 # Amazon India Price Tracker
 
 A multi-user Amazon price tracker web application designed to be deployed on a free Hugging Face Docker Space.
