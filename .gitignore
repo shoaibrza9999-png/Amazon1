@@ -4,3 +4,9 @@ __pycache__/
 *.db
 instance/
 .env
+node_modules/
+package-lock.json
+package.json
+test.js
+playwright-report/
+test-results/
