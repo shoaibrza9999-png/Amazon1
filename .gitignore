@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.db
+instance/
+.env
+node_modules/
+package-lock.json
+package.json
+test.js
+playwright-report/
+test-results/
