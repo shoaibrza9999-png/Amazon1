@@ -57,22 +57,36 @@ def fetch_amazon_price(url, scraper_api_keys):
         payload = {
             'api_key': key,
             'url': url,
-            'country_code': 'in' # specific to Amazon India as per prompt
+            'country_code': 'in', # specific to Amazon India as per prompt
+            'render': 'true' # rendering JS can help fetch dynamic prices on Amazon
         }
         try:
-            r = requests.get('https://api.scraperapi.com/', params=payload, timeout=30)
+            r = requests.get('https://api.scraperapi.com/', params=payload, timeout=60)
             if r.status_code == 200:
                 soup = BeautifulSoup(r.text, 'html.parser')
                 # Look for common Amazon price elements
                 title_el = soup.select_one('#productTitle')
                 title = title_el.text.strip() if title_el else "Unknown Product"
 
-                # Find price
+                # Try finding `.a-price-whole`
                 price_el = soup.select_one('.a-price-whole')
                 if price_el:
                     price_text = price_el.text.strip().replace(',', '').replace('₹', '')
-                    price = float(price_text)
-                    return title, price
+                    try:
+                        price = float(price_text)
+                        return title, price
+                    except ValueError:
+                        pass
+
+                # Try finding `.a-offscreen` which is common for prices now
+                price_el = soup.select_one('.apexPriceToPay .a-offscreen, .priceToPay .a-offscreen')
+                if price_el:
+                    price_text = price_el.text.strip().replace(',', '').replace('₹', '')
+                    try:
+                        price = float(price_text)
+                        return title, price
+                    except ValueError:
+                        pass
 
                 # Alternative price elements
                 price_el = soup.select_one('#priceblock_ourprice, #priceblock_dealprice, .a-color-price')
@@ -83,14 +97,23 @@ def fetch_amazon_price(url, scraper_api_keys):
                         return title, price
                     except ValueError:
                         pass
+
+                print(f"Could not find price in HTML for {url}. It might be out of stock, or a captcha was presented.")
+                # We could try the next key if we got a Captcha, but typically if we got 200 and no price, it's out of stock.
+                # However, for robustness, let's treat it as a failure and try the next key just in case it's a captcha page.
+                continue
+
             elif r.status_code in [401, 403, 429]:
                 print(f"Key exhausted or invalid ({r.status_code}): {key}. Trying next key...")
                 continue
             else:
                 print(f"ScraperAPI Error {r.status_code}. Trying next key...")
+                continue
         except Exception as e:
             print(f"Error scraping {url} with key {key}: {e}")
             continue
+
+    # If all keys exhausted and we found nothing
     return None, None
 
 # Alerts
