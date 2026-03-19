@@ -140,7 +140,7 @@ def send_email_alert(user_email, item_title, item_url, current_price, target_pri
     msg['Subject'] = f"Price Drop Alert: {item_title}"
 
     body = f"Good news! The price of {item_title} has dropped to ₹{current_price}, which is below your target of ₹{target_price}.\n\nBuy it here: {item_url}"
-    msg.attach(MIMEText(body, 'plain'))
+    msg.attach(MIMEText(body, 'plain', 'utf-8'))
 
     try:
         server = smtplib.SMTP(smtp_server, smtp_port)
@@ -311,7 +311,7 @@ def send_item_added_email(user_email, item_title, url, target_price):
     msg['Subject'] = f"Item Added to Tracker: {item_title}"
 
     body = f"You have successfully added a new item to track!\n\nItem: {item_title}\nTarget Price: ₹{target_price}\nURL: {url}\n\nWe will notify you when the price drops below your target."
-    msg.attach(MIMEText(body, 'plain'))
+    msg.attach(MIMEText(body, 'plain', 'utf-8'))
 
     try:
         server = smtplib.SMTP(smtp_server, smtp_port)
