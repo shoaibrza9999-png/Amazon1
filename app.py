@@ -11,13 +11,38 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 import requests
 from bs4 import BeautifulSoup
-from apscheduler.schedulers.background import BackgroundScheduler
 from dotenv import load_dotenv
 
 load_dotenv()
 
 
 app = Flask(__name__)
+
+
+# Setup DB on first request or dynamically for serverless
+@app.before_request
+def setup_db():
+    if not hasattr(app, 'db_initialized'):
+        try:
+            db.create_all()
+            try:
+                db.session.execute(db.text('ALTER TABLE "user" ADD COLUMN email_notifications BOOLEAN DEFAULT TRUE;'))
+                db.session.commit()
+                print("Added email_notifications column.")
+            except Exception:
+                db.session.rollback()
+
+            try:
+                db.session.execute(db.text('ALTER TABLE "user" ADD COLUMN telegram_notifications BOOLEAN DEFAULT TRUE;'))
+                db.session.commit()
+                print("Added telegram_notifications column.")
+            except Exception:
+                db.session.rollback()
+            app.db_initialized = True
+        except Exception as e:
+            print("DB Setup failed:", e)
+
+
 
 # Configure Database
 database_url = os.environ.get('DATABASE_URL', 'sqlite:///local.db')
@@ -202,11 +227,6 @@ def update_prices():
                     if user.telegram_chat_id and user.telegram_notifications:
                         send_telegram_alert(user.telegram_chat_id, item.title, item.url, current_price, item.target_price)
 
-# Start Background Scheduler
-scheduler = BackgroundScheduler()
-# Run every 15 minutes to allow finer granularity for custom intervals
-scheduler.add_job(func=update_prices, trigger="interval", minutes=15)
-scheduler.start()
 
 # Helper for extracting user from request
 def get_current_user():
@@ -216,6 +236,19 @@ def get_current_user():
     user_id = auth_header.split(' ')[1]
     return User.query.get(user_id)
 
+
+
+@app.route('/api/cron', methods=['GET'])
+def cron_job():
+    auth_header = request.headers.get('Authorization')
+    expected_secret = os.environ.get('CRON_SECRET')
+
+    if expected_secret:
+        if auth_header != f"Bearer {expected_secret}":
+            return jsonify({'error': 'Unauthorized'}), 401
+
+    update_prices()
+    return jsonify({'status': 'ok'}), 200
 
 # Routes
 @app.route('/')
@@ -282,6 +315,8 @@ def get_items():
         history_data = [{'price': h.price, 'timestamp': h.timestamp.isoformat()} for h in history]
 
         current_price = history_data[-1]['price'] if history_data else None
+        max_price = max([h['price'] for h in history_data]) if history_data else None
+        min_price = min([h['price'] for h in history_data]) if history_data else None
 
         result.append({
             'id': item.id,
@@ -290,6 +325,8 @@ def get_items():
             'target_price': item.target_price,
             'check_interval_hours': item.check_interval_hours,
             'current_price': current_price,
+            'max_price': max_price,
+            'min_price': min_price,
             'history': history_data
         })
 
@@ -365,7 +402,7 @@ def add_item():
 
     # Send added item email if notifications enabled (in background)
     if user.email_notifications:
-        threading.Thread(target=send_item_added_email, args=(user.email, title, url, target_price)).start()
+        send_item_added_email(user.email, title, url, target_price)
 
     return jsonify({'message': 'Item added successfully', 'item_id': item.id, 'title': title, 'current_price': current_price}), 201
 
