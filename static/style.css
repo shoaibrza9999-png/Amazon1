@@ -185,3 +185,90 @@ th {
         font-size: 14px;
     }
 }
+
+
+/* Modal / Popup for Graph */
+#chart-container.modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    display: block !important;
+}
+
+/* Modal Overlay Background */
+#chart-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.5);
+    z-index: 999;
+}
+
+#chart-container h2 {
+    margin-top: 0;
+    font-size: 1.2rem;
+    padding-right: 40px;
+}
+
+#close-chart {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#close-chart:hover {
+    background: #c0392b;
+}
+
+/* More modern overall styling */
+body {
+    background-color: #f8f9fa;
+}
+
+.container {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    margin-top: 20px;
+    padding: 30px;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+th {
+    background-color: #f1f3f5;
+    color: #495057;
+    font-weight: 600;
+}
+
+td, th {
+    border: 1px solid #dee2e6;
+    padding: 12px;
+}
+
+button {
+    border-radius: 4px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}

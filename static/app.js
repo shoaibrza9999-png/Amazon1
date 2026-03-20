@@ -149,8 +149,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td><a href="${item.url}" target="_blank" title="${item.title}">${item.title.substring(0, 50)}...</a></td>
                 <td>₹${item.current_price !== null ? item.current_price : 'N/A'}</td>
                 <td>₹${item.target_price}</td>
+                <td>₹${item.max_price !== null && item.max_price !== undefined ? item.max_price : 'N/A'}</td>
+                <td>₹${item.min_price !== null && item.min_price !== undefined ? item.min_price : 'N/A'}</td>
                 <td>${item.check_interval_hours || 24} hr</td>
-                <td>
+                <td style="display: flex; gap: 5px; flex-direction: column;">
                     <button onclick="viewGraph(${item.id})">View Graph</button>
                     <button onclick="deleteItem(${item.id})" style="background-color: #d9534f; color: white;">Delete</button>
                 </td>
@@ -165,6 +167,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!item) return;
 
         chartContainer.classList.remove('hidden');
+        chartContainer.classList.add('modal');
+        document.getElementById('chart-overlay').classList.remove('hidden');
         chartTitle.textContent = item.title;
 
         const labels = item.history.map(h => new Date(h.timestamp).toLocaleString());
@@ -202,8 +206,24 @@ document.addEventListener('DOMContentLoaded', () => {
         chartContainer.scrollIntoView({ behavior: 'smooth' });
     };
 
+    const overlay = document.createElement('div');
+    overlay.id = 'chart-overlay';
+    overlay.className = 'hidden';
+    document.body.appendChild(overlay);
+
+    overlay.addEventListener('click', () => {
+        chartContainer.classList.add('hidden');
+        chartContainer.classList.remove('modal');
+        overlay.classList.add('hidden');
+        if (chartInstance) {
+            chartInstance.destroy();
+        }
+    });
+
     document.getElementById('close-chart').addEventListener('click', () => {
         chartContainer.classList.add('hidden');
+        chartContainer.classList.remove('modal');
+        document.getElementById('chart-overlay').classList.add('hidden');
         if (chartInstance) {
             chartInstance.destroy();
         }

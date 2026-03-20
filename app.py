@@ -11,13 +11,38 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 import requests
 from bs4 import BeautifulSoup
-from apscheduler.schedulers.background import BackgroundScheduler
 from dotenv import load_dotenv
 
 load_dotenv()
 
 
 app = Flask(__name__)
+
+
+# Setup DB on first request or dynamically for serverless
+@app.before_request
+def setup_db():
+    if not hasattr(app, 'db_initialized'):
+        try:
+            db.create_all()
+            try:
+                db.session.execute(db.text('ALTER TABLE "user" ADD COLUMN email_notifications BOOLEAN DEFAULT TRUE;'))
+                db.session.commit()
+                print("Added email_notifications column.")
+            except Exception:
+                db.session.rollback()
+
+            try:
+                db.session.execute(db.text('ALTER TABLE "user" ADD COLUMN telegram_notifications BOOLEAN DEFAULT TRUE;'))
+                db.session.commit()
+                print("Added telegram_notifications column.")
+            except Exception:
+                db.session.rollback()
+            app.db_initialized = True
+        except Exception as e:
+            print("DB Setup failed:", e)
+
+
 
 # Configure Database
 database_url = os.environ.get('DATABASE_URL', 'sqlite:///local.db')
@@ -131,7 +156,7 @@ def send_email_alert(user_email, item_title, item_url, current_price, target_pri
     smtp_password = os.environ.get('SMTP_PASSWORD')
 
     if not (smtp_user and smtp_password):
-        print("SMTP credentials not configured. Skipping email.")
+        print("SMTP credentials not configured. Skipping email.", flush=True)
         return
 
     msg = MIMEMultipart()
@@ -140,17 +165,17 @@ def send_email_alert(user_email, item_title, item_url, current_price, target_pri
     msg['Subject'] = f"Price Drop Alert: {item_title}"
 
     body = f"Good news! The price of {item_title} has dropped to ₹{current_price}, which is below your target of ₹{target_price}.\n\nBuy it here: {item_url}"
-    msg.attach(MIMEText(body, 'plain'))
+    msg.attach(MIMEText(body, 'plain', 'utf-8'))
 
     try:
-        server = smtplib.SMTP(smtp_server, smtp_port)
+        server = smtplib.SMTP(smtp_server, smtp_port, timeout=10)
         server.starttls()
         server.login(smtp_user, smtp_password)
         server.send_message(msg)
         server.quit()
-        print(f"Sent email alert to {user_email} for {item_title}")
+        print(f"Sent email alert to {user_email} for {item_title}", flush=True)
     except Exception as e:
-        print(f"Failed to send email: {e}")
+        print(f"Failed to send email: {e}", flush=True)
 
 def send_telegram_alert(chat_id, item_title, item_url, current_price, target_price):
     bot_token = os.environ.get('TELEGRAM_BOT_TOKEN')
@@ -202,11 +227,6 @@ def update_prices():
                     if user.telegram_chat_id and user.telegram_notifications:
                         send_telegram_alert(user.telegram_chat_id, item.title, item.url, current_price, item.target_price)
 
-# Start Background Scheduler
-scheduler = BackgroundScheduler()
-# Run every 15 minutes to allow finer granularity for custom intervals
-scheduler.add_job(func=update_prices, trigger="interval", minutes=15)
-scheduler.start()
 
 # Helper for extracting user from request
 def get_current_user():
@@ -216,6 +236,19 @@ def get_current_user():
     user_id = auth_header.split(' ')[1]
     return User.query.get(user_id)
 
+
+
+@app.route('/api/cron', methods=['GET'])
+def cron_job():
+    auth_header = request.headers.get('Authorization')
+    expected_secret = os.environ.get('CRON_SECRET')
+
+    if expected_secret:
+        if auth_header != f"Bearer {expected_secret}":
+            return jsonify({'error': 'Unauthorized'}), 401
+
+    update_prices()
+    return jsonify({'status': 'ok'}), 200
 
 # Routes
 @app.route('/')
@@ -282,6 +315,8 @@ def get_items():
         history_data = [{'price': h.price, 'timestamp': h.timestamp.isoformat()} for h in history]
 
         current_price = history_data[-1]['price'] if history_data else None
+        max_price = max([h['price'] for h in history_data]) if history_data else None
+        min_price = min([h['price'] for h in history_data]) if history_data else None
 
         result.append({
             'id': item.id,
@@ -290,6 +325,8 @@ def get_items():
             'target_price': item.target_price,
             'check_interval_hours': item.check_interval_hours,
             'current_price': current_price,
+            'max_price': max_price,
+            'min_price': min_price,
             'history': history_data
         })
 
@@ -303,6 +340,7 @@ def send_item_added_email(user_email, item_title, url, target_price):
     smtp_password = os.environ.get('SMTP_PASSWORD')
 
     if not (smtp_user and smtp_password):
+        print("SMTP credentials not configured. Skipping email.", flush=True)
         return
 
     msg = MIMEMultipart()
@@ -311,17 +349,17 @@ def send_item_added_email(user_email, item_title, url, target_price):
     msg['Subject'] = f"Item Added to Tracker: {item_title}"
 
     body = f"You have successfully added a new item to track!\n\nItem: {item_title}\nTarget Price: ₹{target_price}\nURL: {url}\n\nWe will notify you when the price drops below your target."
-    msg.attach(MIMEText(body, 'plain'))
+    msg.attach(MIMEText(body, 'plain', 'utf-8'))
 
     try:
-        server = smtplib.SMTP(smtp_server, smtp_port)
+        server = smtplib.SMTP(smtp_server, smtp_port, timeout=10)
         server.starttls()
         server.login(smtp_user, smtp_password)
         server.send_message(msg)
         server.quit()
-        print(f"Sent added item email to {user_email}")
+        print(f"Sent added item email to {user_email}", flush=True)
     except Exception as e:
-        print(f"Failed to send email: {e}")
+        print(f"Failed to send email: {e}", flush=True)
 
 
 @app.route('/api/add', methods=['POST'])
@@ -364,7 +402,7 @@ def add_item():
 
     # Send added item email if notifications enabled (in background)
     if user.email_notifications:
-        threading.Thread(target=send_item_added_email, args=(user.email, title, url, target_price)).start()
+        send_item_added_email(user.email, title, url, target_price)
 
     return jsonify({'message': 'Item added successfully', 'item_id': item.id, 'title': title, 'current_price': current_price}), 201
 
