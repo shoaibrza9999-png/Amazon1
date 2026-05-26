@@ -1,61 +1,16 @@
----
-title: Amazon Price Tracker
-emoji: 🛒
-colorFrom: yellow
-colorTo: red
-sdk: docker
-app_file: app.py
-pinned: false
----
-# Amazon India Price Tracker
+# React + Vite
 
-A multi-user Amazon price tracker web application designed to be deployed on a free Hugging Face Docker Space.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## Features
-- Track Amazon India product prices in the background.
-- Set target price thresholds.
-- View price history graphs.
-- Receive alerts via Email and Telegram when the price drops below your target.
+Currently, two official plugins are available:
 
-## Tech Stack
-- **Backend:** Python 3, Flask, Flask-SQLAlchemy, APScheduler
-- **Frontend:** Vanilla HTML, CSS, JavaScript
-- **Database:** PostgreSQL (Designed for Neon.tech)
-- **Scraping:** ScraperAPI using `requests` and `BeautifulSoup`
-- **Visualization:** Chart.js
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
-## Local Setup
+## React Compiler
 
-1. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-2. Run the application:
-   ```bash
-   python app.py
-   ```
-   The app uses SQLite by default if `DATABASE_URL` is not provided.
+## Expanding the ESLint configuration
 
-## Deploying to Hugging Face Docker Space
-
-1. Create a new Space on Hugging Face.
-2. Select **Docker** as the Space SDK and choose the Blank template.
-3. Upload all files from this directory to your Space repository.
-4. Go to the **Settings** tab of your Space and add the following **Variables and secrets**:
-
-   - `DATABASE_URL`: Your PostgreSQL connection string (e.g., from Neon.tech). Format: `postgresql://user:password@host/dbname`
-   - `SMTP_SERVER`: The SMTP server for sending emails (e.g., `smtp.gmail.com`).
-   - `SMTP_PORT`: The SMTP port (usually `587`).
-   - `SMTP_USER`: The email address used to send alerts.
-   - `SMTP_PASSWORD`: The app password or password for the SMTP user.
-   - `TELEGRAM_BOT_TOKEN`: Your Telegram Bot token obtained from BotFather.
-
-5. The Dockerfile is pre-configured to install dependencies and expose port `7860`. The Flask app will run on `host='0.0.0.0'` and `port=7860`, which is required by Hugging Face Spaces.
-
-## Usage
-
-1. **Register**: Sign up with a username, password, email, and your ScraperAPI key. Optionally, provide a Telegram Chat ID.
-2. **Add Item**: Paste an Amazon India product URL and set your target price.
-3. **Dashboard**: View your tracked items, current prices, and click "View Graph" to see price history.
-4. **Alerts**: The background scheduler runs every hour, checks prices, and sends alerts if the price drops below your target.
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
