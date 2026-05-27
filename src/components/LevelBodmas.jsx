@@ -20,7 +20,7 @@ export default function LevelBodmas({ onBack }) {
       initial={{ opacity: 0, x: 100 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -100 }}
-      className="min-h-screen p-6 flex flex-col"
+      className="min-h-screen p-4 md:p-6 flex flex-col overflow-x-hidden"
     >
       <header className="flex justify-between items-center mb-8">
         <button onClick={onBack} className="flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors bg-slate-800/50 p-2 rounded-lg">
@@ -32,7 +32,7 @@ export default function LevelBodmas({ onBack }) {
         </div>
       </header>
 
-      <div className="flex-1 max-w-4xl w-full mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+      <div className="flex-1 max-w-4xl w-full mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-center">
         {/* Visual Context Area */}
         <div className="relative rounded-2xl overflow-hidden border-4 border-slate-700 bg-slate-800 aspect-square md:aspect-auto md:h-[500px]">
           <div className="absolute inset-0 bg-[url('/assets/bg-cockpit-asteroid.png')] bg-cover bg-center"></div>
@@ -45,10 +45,10 @@ export default function LevelBodmas({ onBack }) {
         </div>
 
         {/* Math Problem Area */}
-        <div className="bg-slate-800/90 p-8 rounded-3xl border border-slate-700 backdrop-blur-md flex flex-col items-center">
+        <div className="bg-slate-800/90 p-5 md:p-8 rounded-2xl md:rounded-3xl border border-slate-700 backdrop-blur-md flex flex-col items-center">
           <h2 className="text-2xl font-bold text-slate-300 mb-2">Target Coordinates</h2>
-          <div className="bg-slate-900 w-full py-8 rounded-2xl border-2 border-blue-900/50 shadow-inner mb-8 flex justify-center items-center">
-            <span className="text-4xl md:text-5xl font-mono text-blue-400 tracking-wider">
+          <div className="bg-slate-900 w-full py-4 md:py-8 rounded-xl md:rounded-2xl border-2 border-blue-900/50 shadow-inner mb-8 flex justify-center items-center">
+            <span className="text-2xl md:text-5xl font-mono text-blue-400 tracking-wider">
               {problem}
             </span>
           </div>
@@ -61,7 +61,7 @@ export default function LevelBodmas({ onBack }) {
                 whileTap={{ scale: 0.95 }}
                 onClick={() => !showFeedback && handleAnswer(opt)}
                 className={`
-                  py-6 rounded-xl text-2xl font-bold border-2 transition-colors
+                  py-4 md:py-6 rounded-xl text-xl md:text-2xl font-bold border-2 transition-colors
                   ${showFeedback && opt === correctAnswer
                     ? 'bg-green-600/20 border-green-500 text-green-400'
                     : showFeedback && opt === selectedAnswer && opt !== correctAnswer

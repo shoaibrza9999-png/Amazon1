@@ -23,7 +23,7 @@ export default function LevelFractions({ onBack, type }) {
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 1.1 }}
-      className="min-h-screen p-6 flex flex-col"
+      className="min-h-screen p-4 md:p-6 flex flex-col overflow-x-hidden"
     >
       <header className="flex justify-between items-center mb-8">
         <button onClick={onBack} className="flex items-center gap-2 text-purple-400 hover:text-purple-300 transition-colors bg-slate-800/50 p-2 rounded-lg">
@@ -32,15 +32,15 @@ export default function LevelFractions({ onBack, type }) {
         </button>
       </header>
 
-      <div className="flex-1 max-w-5xl w-full mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <div className="flex-1 max-w-5xl w-full mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
 
         {/* Story/Task Panel */}
-        <div className="bg-slate-800/80 p-8 rounded-3xl border border-purple-900/50 backdrop-blur-sm order-2 lg:order-1">
-          <h2 className="text-3xl font-bold text-white mb-4 flex items-center gap-3">
+        <div className="bg-slate-800/80 p-5 lg:p-8 rounded-2xl lg:rounded-3xl border border-purple-900/50 backdrop-blur-sm order-2 lg:order-1">
+          <h2 className="text-2xl lg:text-3xl font-bold text-white mb-4 flex items-center gap-3">
             <Zap className="text-purple-400" />
             Energy Cell Charging
           </h2>
-          <p className="text-xl text-purple-200 mb-8 leading-relaxed">
+          <p className="text-base lg:text-xl text-purple-200 mb-6 lg:mb-8 leading-relaxed">
             {type === 'intro'
               ? "The alien artifact requires exactly "
               : "To balance the ship's thrusters, add the required fuel: "}
@@ -50,7 +50,7 @@ export default function LevelFractions({ onBack, type }) {
             of its total capacity. Tap the segments to fill them with plasma energy.
           </p>
 
-          <div className="bg-slate-900 rounded-xl p-6 border border-slate-700">
+          <div className="bg-slate-900 rounded-xl p-4 lg:p-6 border border-slate-700">
              <div className="flex justify-between items-end mb-2">
                <span className="text-slate-400">Current Charge</span>
                <span className="text-2xl font-bold text-purple-400">{selectedParts.length} / {totalParts}</span>
@@ -70,9 +70,9 @@ export default function LevelFractions({ onBack, type }) {
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mt-8 p-4 bg-green-900/30 border border-green-500/50 rounded-xl flex items-center gap-4"
+                className="mt-4 lg:mt-8 p-3 lg:p-4 bg-green-900/30 border border-green-500/50 rounded-xl flex items-center gap-4"
               >
-                <CheckCircle className="text-green-400 w-8 h-8 flex-shrink-0" />
+                <CheckCircle className="text-green-400 w-6 h-6 lg:w-8 lg:h-8 flex-shrink-0" />
                 <p className="text-green-200">System balanced! Power restored to optimal levels.</p>
               </motion.div>
             )}
@@ -90,7 +90,7 @@ export default function LevelFractions({ onBack, type }) {
         </div>
 
         {/* Interactive Visual Area */}
-        <div className="relative aspect-square w-full max-w-md mx-auto order-1 lg:order-2">
+        <div className="relative aspect-square w-[250px] lg:w-full max-w-[250px] lg:max-w-md mx-auto order-1 lg:order-2">
            {/* Background Context */}
            <div className="absolute inset-0 rounded-full bg-[url('/assets/bg-energy-core.png')] bg-cover opacity-30 animate-pulse-slow mix-blend-screen"></div>
 
